@@ -1864,7 +1864,7 @@ const PED = {
       <td><span class="row-num"></span></td>
       <td><select class="ts" onchange="mkDirty('ped-st')">${maqOpts}</select></td>
       <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder="" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.pieza||"")}</textarea></td>
-      <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder="Proveedor" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.proveedor||"")}</textarea></td>
+      <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder=" " oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.proveedor||"")}</textarea></td>
       <td><input class="ti ped-date" type="date" value="${esc(d.fpedido||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
       <td><input class="ti ped-date" type="date" value="${esc(d.fnecesidad||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
       <td><input class="ti ped-date" type="date" value="${esc(d.fentrega||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
