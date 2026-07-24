@@ -378,6 +378,32 @@ nav a.tab-link.active { background: rgba(255,255,255,.18); color: white; font-we
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%23B72020'/%3E%3C/svg%3E") !important;
 }
 
+/* ── ESTADO PEDIDO (repuestos) ───────────────────────────── */
+.pe-reclamo {
+  background-color: var(--err-bg) !important; color: var(--err-text) !important; border-color: var(--err-bd) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%23B72020'/%3E%3C/svg%3E") !important;
+}
+.pe-pagado {
+  background-color: #F4ECF7 !important; color: #6C3483 !important; border-color: #D2B4DE !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%236C3483'/%3E%3C/svg%3E") !important;
+}
+.pe-pendpago {
+  background-color: var(--ok-bg) !important; color: var(--ok-text) !important; border-color: var(--ok-bd) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%231E6B2E'/%3E%3C/svg%3E") !important;
+}
+.pe-proceso {
+  background-color: #E3F2FD !important; color: #1565C0 !important; border-color: #AED6F1 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%231565C0'/%3E%3C/svg%3E") !important;
+}
+.pe-cotiz {
+  background-color: var(--warn-bg) !important; color: var(--warn-text) !important; border-color: var(--warn-bd) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%238A5C00'/%3E%3C/svg%3E") !important;
+}
+.pe-noiniciado {
+  background-color: #F0F1F3 !important; color: var(--text-2) !important; border-color: var(--border) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%235A6470'/%3E%3C/svg%3E") !important;
+}
+
 /* ── FREQ & RESP SELECTS ─────────────────────────────────── */
 .fsel { font-weight: 700 !important; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='6'%3E%3Cpath d='M0 0l4.5 6L9 0z' fill='%231A5276'/%3E%3C/svg%3E") !important; background-repeat: no-repeat !important; background-position: right 6px center !important; }
 .fsel.fd  { background-color: #EBF5FB !important; color: #1A5276 !important; }
@@ -412,6 +438,14 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
   font-size: 14px; font-weight: 700; cursor: pointer; line-height: 1;
 }
 .del-btn:hover { background: #F5C6C6; }
+
+/* ── FECHA dd/mm/aaaa: wrapper + picker oculto ───────────── */
+.date-wrap { position: relative; }
+.date-picker-hidden {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  opacity: 0; pointer-events: none; cursor: pointer;
+  border: none; padding: 0; margin: 0; z-index: 1;
+}
 
 /* ── CALENDAR (operador: semanal) ────────────────────────── */
 .cal-title {
@@ -570,6 +604,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
   .tbl tr { break-inside: avoid; page-break-inside: avoid; }
   .tbl td { vertical-align: top !important; }
   .ti, .ta, .ts { border: none !important; background-color: transparent !important; box-shadow: none !important; }
+  .date-picker-hidden { display: none !important; }
   .ts, .fsel, .rsel { background-image: none !important; appearance: none !important; -webkit-appearance: none !important; }
   .ta { height: auto !important; overflow: visible !important; white-space: pre-wrap !important; }
   .ta-print { display: block !important; }
@@ -652,7 +687,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">03</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -719,7 +754,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">03</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(4,1fr)">
@@ -773,7 +808,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">03</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(3,1fr)">
@@ -810,7 +845,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">03</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -826,12 +861,14 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <table class="tbl" id="ped-table" style="table-layout:auto">
           <thead><tr>
             <th style="width:30px">#</th>
-            <th style="min-width:150px">Máquina</th>
+            <th style="min-width:110px">Máquina</th>
             <th style="min-width:220px">Pieza / Producto · Necesidad</th>
+            <th style="width:70px">Cantidad</th>
             <th style="min-width:140px">Proveedor</th>
             <th style="width:120px">Fecha pedido</th>
             <th style="width:120px">Fecha necesidad</th>
             <th style="width:120px">Fecha entrega</th>
+            <th style="width:145px">Estado</th>
             <th class="no-print" style="width:30px">—</th>
           </tr></thead>
           <tbody id="ped-tbody"></tbody>
@@ -1015,6 +1052,38 @@ function colorSel(s){
 
 /* ── AUTOGROW ────────────────────────────────────────────── */
 function autoGrow(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
+
+/* ── FECHAS dd/mm/aaaa (texto + picker nativo oculto) ────── */
+function toDisplay(iso){
+  if(!iso) return "";
+  const p=iso.split("-");
+  if(p.length===3) return p[2]+"/"+p[1]+"/"+p[0];
+  return iso;
+}
+function toISO(dmy){
+  if(!dmy) return "";
+  const p=dmy.split("/");
+  if(p.length===3 && p[2].length===4) return p[2]+"-"+p[1].padStart(2,"0")+"-"+p[0].padStart(2,"0");
+  return "";
+}
+function maskFecha(el){
+  let vl=el.value.replace(/\D/g,"").slice(0,8);
+  if(vl.length>4) vl=vl.slice(0,2)+"/"+vl.slice(2,4)+"/"+vl.slice(4);
+  else if(vl.length>2) vl=vl.slice(0,2)+"/"+vl.slice(2);
+  el.value=vl;
+}
+function abrirPickerFecha(inp){
+  const picker=inp.nextElementSibling;
+  if(!picker) return;
+  picker.value=toISO(inp.value);
+  picker.style.pointerEvents="auto"; picker.style.zIndex="9999";
+  try{ picker.showPicker(); }catch(e){ picker.click(); }
+}
+function pickFecha(picker){
+  const inp=picker.previousElementSibling;
+  if(inp && picker.value){ inp.value=toDisplay(picker.value); mkDirty("ped-st"); }
+  picker.style.pointerEvents="none"; picker.style.zIndex="";
+}
 document.addEventListener("input", e=>{ if(e.target.classList.contains("ta")) autoGrow(e.target); });
 
 /* ── DRAG & DROP (plan rows + reg rows) ──────────────────── */
@@ -1308,7 +1377,7 @@ const P = {
           <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
           <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">03</span></div>
+          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
         </div>
       </div>
       <div class="franja-inactivo">⚠ Equipo inactivo — este plan está desactivado</div>
@@ -1844,7 +1913,45 @@ function cargarSelectoresCalendario(){
 /* ═══════════════════════════════════════════════════════════
    PED: PEDIDOS DE REPUESTOS (permanente, no ligado al calendario)
 ═══════════════════════════════════════════════════════════ */
+const PED_ESTADOS = [
+  ["reclamo",    "RECLAMO"],
+  ["pendpago",   "PEND DE PAGO"],
+  ["proceso",    "EN PROCESO"],
+  ["cotiz",      "BAJO COTIZACION"],
+  ["noiniciado", "NO INICIADO"],
+  ["pagado",     "PAGADO"]
+];
+const PED_ORDEN = { reclamo:1, pendpago:2, proceso:3, cotiz:4, noiniciado:5, pagado:6 };
+
 const PED = {
+  estSelect(cur){
+    cur = cur || "noiniciado";
+    const opts = PED_ESTADOS.map(([v,label])=>
+      `<option value="${v}"${v===cur?" selected":""}>${label}</option>`
+    ).join("");
+    return `<select class="sel-estado ts pe-${cur}" onchange="PED.onEstadoChange(this)">${opts}</select>`;
+  },
+  onEstadoChange(sel){
+    PED_ESTADOS.forEach(([v])=> sel.classList.remove("pe-"+v));
+    sel.classList.add("pe-"+sel.value);
+    mkDirty("ped-st");
+    PED.sortRows();
+  },
+  sortRows(){
+    const tb=document.getElementById("ped-tbody");
+    const trs=[...tb.querySelectorAll("tr")];
+    trs.sort((a,b)=>{
+      const va=a.querySelector(".sel-estado")?.value||"noiniciado";
+      const vb=b.querySelector(".sel-estado")?.value||"noiniciado";
+      const oa=PED_ORDEN[va]||99, ob=PED_ORDEN[vb]||99;
+      if(oa!==ob) return oa-ob;
+      const fa=toISO(a.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
+      const fb=toISO(b.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
+      return fa.localeCompare(fb);
+    });
+    trs.forEach(tr=>tb.appendChild(tr));
+    PED._renum();
+  },
   _buildTr(d){
     d=d||{};
     const tr=document.createElement("tr");
@@ -1864,10 +1971,24 @@ const PED = {
       <td><span class="row-num"></span></td>
       <td><select class="ts" onchange="mkDirty('ped-st')">${maqOpts}</select></td>
       <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder="" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.pieza||"")}</textarea></td>
+      <td><input class="ti ped-cant" type="number" min="0" step="1" value="${esc(d.cantidad||"")}" style="text-align:center" oninput="mkDirty('ped-st')"></td>
       <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder=" " oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.proveedor||"")}</textarea></td>
-      <td><input class="ti ped-date" type="date" value="${esc(d.fpedido||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
-      <td><input class="ti ped-date" type="date" value="${esc(d.fnecesidad||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
-      <td><input class="ti ped-date" type="date" value="${esc(d.fentrega||"")}" style="max-width:130px;font-size:inherit" oninput="mkDirty('ped-st')"></td>
+      <td><div class="date-wrap">
+        <input class="ti ped-date" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
+          value="${esc(d.fpedido||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)">
+        <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this)">
+      </div></td>
+      <td><div class="date-wrap">
+        <input class="ti ped-date ped-nec" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
+          value="${esc(d.fnecesidad||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)" onblur="PED.sortRows()">
+        <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this);PED.sortRows()">
+      </div></td>
+      <td><div class="date-wrap">
+        <input class="ti ped-date" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
+          value="${esc(d.fentrega||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)">
+        <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this)">
+      </div></td>
+      <td>${PED.estSelect(d.estado)}</td>
       <td style="text-align:center;padding:4px" class="no-print"><button class="del-btn" onclick="PED.elim(this)">×</button></td>`;
 
     return tr;
@@ -1880,22 +2001,26 @@ const PED = {
   _ser(){
     return [...document.querySelectorAll("#ped-tbody tr")].map(tr=>{
       const sel=tr.querySelector(".ts");
+      const est=tr.querySelector(".sel-estado");
       const tas=tr.querySelectorAll(".ped-ta");
+      const cant=tr.querySelector(".ped-cant");
       const dates=tr.querySelectorAll(".ped-date");
       return {
         mid:        sel?.value||"",
         pieza:      tas[0]?.value||"",
+        cantidad:   cant?.value||"",
         proveedor:  tas[1]?.value||"",
         fpedido:    dates[0]?.value||"",
         fnecesidad: dates[1]?.value||"",
-        fentrega:   dates[2]?.value||""
+        fentrega:   dates[2]?.value||"",
+        estado:     est?.value||"noiniciado"
       };
     });
   },
   addRow(){
     const tb=document.getElementById("ped-tbody");
     tb.appendChild(PED._buildTr({}));
-    PED._renum(); mkDirty("ped-st");
+    PED.sortRows(); mkDirty("ped-st");
   },
   elim(btn){
     const tr=btn.closest("tr");
@@ -1913,7 +2038,7 @@ const PED = {
     const tb=document.getElementById("ped-tbody"); tb.innerHTML="";
     const rows=(data&&data.length)?data:Array.from({length:15},()=>({}));
     rows.forEach(d=>{ tb.appendChild(PED._buildTr(d)); });
-    PED._renum();
+    PED.sortRows();
     setTimeout(()=>{ tb.querySelectorAll(".ped-ta").forEach(autoGrow); }, 0);
   }
 };
