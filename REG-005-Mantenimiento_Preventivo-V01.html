@@ -687,7 +687,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -754,7 +754,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(4,1fr)">
@@ -808,7 +808,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(3,1fr)">
@@ -845,7 +845,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -1377,7 +1377,7 @@ const P = {
           <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
           <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
         </div>
       </div>
       <div class="franja-inactivo">⚠ Equipo inactivo — este plan está desactivado</div>
@@ -1451,7 +1451,7 @@ function getInicioSemana1(anio,mes){
   return new Date(anio, mes, 1 - offset);
 }
 
-// Cantidad de semanas (lunes-sábado) necesarias para cubrir el mes completo
+// Cantidad de semanas (lunes-viernes) necesarias para cubrir el mes completo
 function getNumSemanas(anio,mes){
   const inicio1 = getInicioSemana1(anio,mes);
   const ultimoDia = new Date(anio, mes + 1, 0);
@@ -1467,8 +1467,8 @@ function getSemanaDelMes(fecha){
   return Math.floor(diffDias / 7) + 1;
 }
 
-// Devuelve SIEMPRE lunes a sábado (6 días). Si la semana cae a caballo entre
-// dos meses (ej: 29 jun - 04 jul), se muestra completa cruzando el mes,
+// Devuelve SIEMPRE lunes a viernes (5 días). Si la semana cae a caballo entre
+// dos meses (ej: 29 jun - 03 jul), se muestra completa cruzando el mes,
 // tanto si se la busca como "última semana de junio" como "primera de julio".
 function getFechasSemana(anio,mes,semana){
   const inicio1 = getInicioSemana1(anio,mes);
@@ -1476,7 +1476,7 @@ function getFechasSemana(anio,mes,semana){
   lunes.setDate(inicio1.getDate() + (semana - 1) * 7);
 
   const fechas=[];
-  for(let i=0;i<6;i++){ // lunes(0) a sábado(5) — sin domingo
+  for(let i=0;i<5;i++){ // lunes(0) a viernes(4) — sin sábado ni domingo
     const f=new Date(lunes);
     f.setDate(lunes.getDate()+i);
     fechas.push(f);
