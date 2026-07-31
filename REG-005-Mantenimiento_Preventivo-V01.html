@@ -903,11 +903,11 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
       <div class="section-title">Registro de pedidos</div>
       <div class="toolbar no-print">
         <div class="spacer"></div>
-        <button class="btn btn-primary" onclick="PED.addRow()">＋ Agregar pedido</button>
         <button class="btn btn-ok" onclick="PED.save()">Guardar</button>
         <button class="btn btn-light" onclick="imprimirSolo('reg-ejecucion-ped')">↓ PDF</button>
         <span class="sync-inline" id="ped-st">Sin guardar</span>
       </div>
+      <button class="btn-add-row no-print" onclick="PED.addRow()">＋ Agregar pedido</button>
       <div class="tbl-wrap">
         <table class="tbl" id="ped-table" style="table-layout:auto">
           <thead><tr>
@@ -925,7 +925,6 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
           <tbody id="ped-tbody"></tbody>
         </table>
       </div>
-      <button class="btn-add-row no-print" onclick="PED.addRow()">＋ Agregar pedido</button>
     </div>
   </div>
 </div><!-- /page-cambios -->
@@ -1102,7 +1101,40 @@ function colorSel(s){
 }
 
 /* ── AUTOGROW ────────────────────────────────────────────── */
-function autoGrow(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
+function autoGrow(el){
+  el.style.height="auto";
+  const cs=getComputedStyle(el);
+  const borderY=parseFloat(cs.borderTopWidth||0)+parseFloat(cs.borderBottomWidth||0);
+  el.style.height=(el.scrollHeight+borderY)+"px";
+}
+// Recalcular alturas cuando termina de cargar la tipografía (las medidas cambian levemente con la fuente real)
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ document.querySelectorAll(".ta").forEach(autoGrow); });
+}
+// Recalcular alturas al cambiar el ancho de ventana (las columnas cambian de tamaño)
+let _resizeAutoGrowT=null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(_resizeAutoGrowT);
+  _resizeAutoGrowT=setTimeout(()=>{ document.querySelectorAll(".ta").forEach(autoGrow); }, 150);
+});
+// Recalcular alturas cuando el ANCHO DE LA TABLA cambia (columnas con "width:1%" se
+// terminan de acomodar después del primer render, y eso deja textareas más chicos de
+// lo que necesitan; esto es lo que cortaba el texto en Pedidos de Repuestos).
+if(window.ResizeObserver){
+  let _lastTblW={};
+  const _tblRO=new ResizeObserver(entries=>{
+    entries.forEach(entry=>{
+      const tbl=entry.target;
+      const w=Math.round(entry.contentRect.width);
+      const key=tbl.id||"_t";
+      if(_lastTblW[key]===w) return; // solo re-medir si cambió el ANCHO, no cuando crece por su propia altura
+      _lastTblW[key]=w;
+      tbl.querySelectorAll(".ta").forEach(autoGrow);
+    });
+  });
+  document.querySelectorAll("table.tbl").forEach(tbl=>_tblRO.observe(tbl));
+}
+
 
 /* ── FECHAS dd/mm/aaaa (texto + picker nativo oculto) ────── */
 function toDisplay(iso){
@@ -1972,7 +2004,7 @@ const PED_ESTADOS = [
   ["noiniciado", "NO INICIADO"],
   ["pagado",     "PAGADO"]
 ];
-const PED_ORDEN = { reclamo:1, pendpago:2, proceso:3, cotiz:4, noiniciado:5, pagado:6 };
+const PED_ORDEN = { noiniciado:1, reclamo:2, pendpago:3, proceso:4, cotiz:5, pagado:6 };
 
 const PED = {
   estSelect(cur){
@@ -1996,8 +2028,8 @@ const PED = {
       const vb=b.querySelector(".sel-estado")?.value||"noiniciado";
       const oa=PED_ORDEN[va]||99, ob=PED_ORDEN[vb]||99;
       if(oa!==ob) return oa-ob;
-      const fa=toISO(a.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
-      const fb=toISO(b.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
+      const fa=toISO(a.querySelectorAll(".ped-date")[1]?.value) || "";
+      const fb=toISO(b.querySelectorAll(".ped-date")[1]?.value) || "";
       return fa.localeCompare(fb);
     });
     trs.forEach(tr=>tb.appendChild(tr));
@@ -2070,8 +2102,12 @@ const PED = {
   },
   addRow(){
     const tb=document.getElementById("ped-tbody");
-    tb.appendChild(PED._buildTr({}));
-    PED.sortRows(); mkDirty("ped-st");
+    const tr=PED._buildTr({});
+    tb.insertBefore(tr, tb.firstChild);
+    PED._renum();
+    mkDirty("ped-st");
+    requestAnimationFrame(()=>{ tr.querySelectorAll(".ped-ta").forEach(autoGrow); });
+    setTimeout(()=>{ PED.sortRows(); }, 300);
   },
   elim(btn){
     const tr=btn.closest("tr");
