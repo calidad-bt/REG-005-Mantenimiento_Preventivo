@@ -439,6 +439,58 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 }
 .del-btn:hover { background: #F5C6C6; }
 
+/* ── FOTOS (Pedidos de Repuestos) ────────────────────────── */
+.ped-fotos {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;
+}
+.ped-foto-thumb {
+  position: relative; width: 30px; height: 30px;
+  border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+}
+.ped-foto-thumb img {
+  width: 100%; height: 100%; object-fit: cover; cursor: pointer; display: block;
+}
+.ped-foto-del {
+  position: absolute; top: -2px; right: -2px;
+  width: 14px; height: 14px; padding: 0; line-height: 1;
+  border-radius: 50%; border: 1px solid var(--err-bd);
+  background: var(--err-bg); color: var(--err-text);
+  font-size: 10px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ped-foto-add {
+  width: 100%; height: 22px;
+  border: 1.5px dashed var(--accent-l); border-radius: 3px;
+  background: transparent; color: var(--accent);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.ped-foto-add:hover { background: var(--accent-l); }
+.ped-foto-add:disabled { opacity: .5; cursor: default; }
+
+#fotoLightbox {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.78);
+  align-items: center; justify-content: center; padding: 30px;
+}
+#fotoLightbox.open { display: flex; }
+#fotoLightbox img {
+  max-width: 100%; max-height: 100%;
+  border-radius: var(--radius); background: white;
+}
+#fotoLightboxClose {
+  position: absolute; top: 16px; right: 20px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.08);
+  color: white; font-size: 18px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+@media print {
+  .ped-foto-thumb { width: 22mm; height: 22mm; }
+  .ped-foto-add, #fotoLightbox { display: none !important; }
+}
+
 /* ── FECHA dd/mm/aaaa: wrapper + picker oculto ───────────── */
 .date-wrap { position: relative; }
 .date-picker-hidden {
@@ -647,10 +699,10 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 /* ── PRINT ───────────────────────────────────────────────── */
 .ta-print { display: none; }
 @media print {
-  @page { size: A4 landscape; margin: 8mm; }
+  @page { size: 297mm 210mm; margin: 8mm; }
   nav, .no-print { display: none !important; }
   body { background: white; }
-  .layout { padding: 0 !important; gap: 0 !important; }
+  .layout { padding: 0 !important; gap: 0 !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
   .card { box-shadow: none !important; border-radius: 0 !important; }
   .tbl tr { break-inside: avoid; page-break-inside: avoid; }
   .tbl td { vertical-align: top !important; }
@@ -920,6 +972,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
             <th style="width:120px">Fecha necesidad</th>
             <th style="width:120px">Fecha entrega</th>
             <th style="width:145px">Estado</th>
+            <th style="width:110px">Fotos</th>
             <th class="no-print" style="width:30px">—</th>
           </tr></thead>
           <tbody id="ped-tbody"></tbody>
@@ -930,6 +983,11 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 </div><!-- /page-cambios -->
 
 </div><!-- /layout -->
+
+<div id="fotoLightbox" class="no-print" onclick="if(event.target===this) this.classList.remove('open')">
+  <button type="button" id="fotoLightboxClose" onclick="document.getElementById('fotoLightbox').classList.remove('open')">×</button>
+  <img id="fotoLightboxImg" src="" alt="">
+</div>
 
 <script>
 /* ── FIREBASE ────────────────────────────────────────────── */
@@ -2072,6 +2130,12 @@ const PED = {
         <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this)">
       </div></td>
       <td data-label="Estado">${PED.estSelect(d.estado)}</td>
+      <td data-label="Fotos">
+        <input type="hidden" class="ped-fotos-data" value="${esc(JSON.stringify(d.fotos||[]))}">
+        <div class="ped-fotos">${PED.fotosHTML(d.fotos||[])}</div>
+        <button type="button" class="ped-foto-add no-print" title="Agregar fotos" onclick="PED.pickFotos(this)">＋</button>
+        <input type="file" class="ped-foto-input no-print" accept="image/*" multiple style="display:none" onchange="PED.onFotos(this)">
+      </td>
       <td data-label="Eliminar" style="text-align:center;padding:4px" class="no-print"><button class="del-btn" onclick="PED.elim(this)">×</button></td>`;
 
     return tr;
@@ -2088,6 +2152,9 @@ const PED = {
       const tas=tr.querySelectorAll(".ped-ta");
       const cant=tr.querySelector(".ped-cant");
       const dates=tr.querySelectorAll(".ped-date");
+      const fh=tr.querySelector(".ped-fotos-data");
+      let fotos=[];
+      try{ fotos=JSON.parse(fh?.value||"[]"); }catch(e){ fotos=[]; }
       return {
         mid:        sel?.value||"",
         pieza:      tas[0]?.value||"",
@@ -2096,9 +2163,84 @@ const PED = {
         fpedido:    dates[0]?.value||"",
         fnecesidad: dates[1]?.value||"",
         fentrega:   dates[2]?.value||"",
-        estado:     est?.value||"noiniciado"
+        estado:     est?.value||"noiniciado",
+        fotos:      fotos
       };
     });
+  },
+  fotosHTML(fotos){
+    return (fotos||[]).map((src,i)=>
+      `<div class="ped-foto-thumb">
+        <img src="${src}" onclick="PED.verFoto('${src.replace(/'/g,"&#39;")}')">
+        <button type="button" class="ped-foto-del no-print" title="Quitar foto" onclick="PED.delFoto(this)">×</button>
+      </div>`
+    ).join("");
+  },
+  pickFotos(btn){
+    btn.nextElementSibling.click();
+  },
+  compressImage(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+          const maxW=1000;
+          let w=img.width, h=img.height;
+          if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+          const canvas=document.createElement("canvas");
+          canvas.width=w; canvas.height=h;
+          canvas.getContext("2d").drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL("image/jpeg",0.7));
+        };
+        img.onerror=reject;
+        img.src=e.target.result;
+      };
+      reader.onerror=reject;
+      reader.readAsDataURL(file);
+    });
+  },
+  async onFotos(input){
+    const td=input.closest("td");
+    const dataInput=td.querySelector(".ped-fotos-data");
+    const cont=td.querySelector(".ped-fotos");
+    let fotos=[];
+    try{ fotos=JSON.parse(dataInput.value||"[]"); }catch(e){ fotos=[]; }
+    const files=[...input.files];
+    input.value="";
+    if(!files.length) return;
+    const addBtn=td.querySelector(".ped-foto-add");
+    addBtn.disabled=true; addBtn.textContent="…";
+    try{
+      for(const f of files){
+        try{ fotos.push(await PED.compressImage(f)); }catch(e){}
+      }
+    } finally {
+      addBtn.disabled=false; addBtn.textContent="＋";
+    }
+    dataInput.value=JSON.stringify(fotos);
+    cont.innerHTML=PED.fotosHTML(fotos);
+    mkDirty("ped-st");
+  },
+  delFoto(btn){
+    if(!confirm("¿Quitar esta foto?")) return;
+    const td=btn.closest("td");
+    const dataInput=td.querySelector(".ped-fotos-data");
+    const cont=td.querySelector(".ped-fotos");
+    let fotos=[];
+    try{ fotos=JSON.parse(dataInput.value||"[]"); }catch(e){ fotos=[]; }
+    const idx=[...cont.children].indexOf(btn.closest(".ped-foto-thumb"));
+    if(idx>-1) fotos.splice(idx,1);
+    dataInput.value=JSON.stringify(fotos);
+    cont.innerHTML=PED.fotosHTML(fotos);
+    mkDirty("ped-st");
+  },
+  verFoto(src){
+    const ov=document.getElementById("fotoLightbox");
+    const img=document.getElementById("fotoLightboxImg");
+    if(!ov||!img) return;
+    img.src=src;
+    ov.classList.add("open");
   },
   addRow(){
     const tb=document.getElementById("ped-tbody");
