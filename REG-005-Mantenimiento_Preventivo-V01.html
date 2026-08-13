@@ -790,7 +790,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -857,7 +857,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(4,1fr)">
@@ -911,7 +911,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(3,1fr)">
@@ -948,7 +948,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -1025,9 +1025,22 @@ function setSyncStatus(text, cls=""){
 function setInlineStatus(id, text, cls=""){
   const el = document.getElementById(id);
   if(el){ el.textContent = text; el.className = "sync-inline " + cls; }
+  if(cls === "dirty") scheduleAutoSave(id);
 }
 function mkDirty(id){ setInlineStatus(id, "Cambios sin guardar", "dirty"); }
 function mkSaved(id){ setInlineStatus(id, "✓ Guardado " + new Date().toLocaleTimeString(), "ok"); }
+
+/* ── AUTOGUARDADO ────────────────────────────────────────── */
+const AUTO_SAVE_DELAY = 1500;
+const autoSaveTimers = {};
+function scheduleAutoSave(id){
+  clearTimeout(autoSaveTimers[id]);
+  autoSaveTimers[id] = setTimeout(()=>{
+    if(id === "reg-st")      M.save(true);
+    else if(id === "ped-st") PED.save();
+    else if(id.startsWith("pst-")) P.savePlan(id.slice(4));
+  }, AUTO_SAVE_DELAY);
+}
 
 /* ── POLLING ─────────────────────────────────────────────── */
 let lastRegTs=0, lastPlanTs=0, lastPedTs=0, pollInterval=null;
@@ -1391,12 +1404,14 @@ const M = {
     });
     M.save(); checkPlanesEmpty();
   },
-  async save(){
+  async save(auto=false){
     const rows=M._ser();
     if(rows.length===0){
       // Chequear si hay datos guardados antes de permitir sobrescribir con vacío
       const saved=lsGet(LS_REG);
       if(saved?.rows?.length){
+        // En autoguardado no interrumpimos con confirm(): simplemente no se guarda aún
+        if(auto) return;
         if(!confirm("⚠ No hay máquinas en la tabla actual. Esto BORRARÁ los datos guardados.\n¿Estás seguro?")) return;
       }
     }
@@ -1518,7 +1533,7 @@ const P = {
           <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
           <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
         </div>
       </div>
       <div class="franja-inactivo">⚠ Equipo inactivo — este plan está desactivado</div>
