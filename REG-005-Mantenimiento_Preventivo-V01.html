@@ -439,6 +439,58 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 }
 .del-btn:hover { background: #F5C6C6; }
 
+/* ── FOTOS (Pedidos de Repuestos) ────────────────────────── */
+.ped-fotos {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px;
+}
+.ped-foto-thumb {
+  position: relative; width: 30px; height: 30px;
+  border: 1px solid var(--border); border-radius: 3px; overflow: hidden;
+}
+.ped-foto-thumb img {
+  width: 100%; height: 100%; object-fit: cover; cursor: pointer; display: block;
+}
+.ped-foto-del {
+  position: absolute; top: -2px; right: -2px;
+  width: 14px; height: 14px; padding: 0; line-height: 1;
+  border-radius: 50%; border: 1px solid var(--err-bd);
+  background: var(--err-bg); color: var(--err-text);
+  font-size: 10px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ped-foto-add {
+  width: 100%; height: 22px;
+  border: 1.5px dashed var(--accent-l); border-radius: 3px;
+  background: transparent; color: var(--accent);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.ped-foto-add:hover { background: var(--accent-l); }
+.ped-foto-add:disabled { opacity: .5; cursor: default; }
+
+#fotoLightbox {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.78);
+  align-items: center; justify-content: center; padding: 30px;
+}
+#fotoLightbox.open { display: flex; }
+#fotoLightbox img {
+  max-width: 100%; max-height: 100%;
+  border-radius: var(--radius); background: white;
+}
+#fotoLightboxClose {
+  position: absolute; top: 16px; right: 20px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.08);
+  color: white; font-size: 18px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+@media print {
+  .ped-foto-thumb { width: 22mm; height: 22mm; }
+  .ped-foto-add, #fotoLightbox { display: none !important; }
+}
+
 /* ── FECHA dd/mm/aaaa: wrapper + picker oculto ───────────── */
 .date-wrap { position: relative; }
 .date-picker-hidden {
@@ -593,13 +645,64 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 .badge-warn { background: var(--warn-bg); color: var(--warn-text); border: 1px solid var(--warn-bd); }
 .badge-err  { background: var(--err-bg);  color: var(--err-text);  border: 1px solid var(--err-bd); }
 
+/* ══════════════ RESPONSIVE / MOBILE ══════════════ */
+@media screen and (max-width: 760px) {
+  nav { padding: 0 10px; gap: 4px; }
+  .nav-brand { padding-right: 8px; margin-right: 2px; font-size: 10px; }
+  nav a.tab-link { padding: 5px 8px; font-size: 10.5px; }
+  .nav-end { padding-left: 8px; gap: 4px; }
+
+  .layout { padding: calc(var(--nav-h) + 14px) 8px 30px; gap: 10px; }
+
+  .doc-header { grid-template-columns: 1fr; }
+  .logo-box { height: 40px; border-right: none; border-bottom: 1px solid var(--border); padding: 6px; }
+  .doc-title-area { border-right: none; border-bottom: 1px solid var(--border); padding: 10px 12px; }
+  .doc-meta { grid-template-columns: 1fr 1fr; }
+
+  .card-body { padding: 10px 10px 12px; }
+
+  .mbar { grid-template-columns: 1fr !important; }
+  .mbar-cell { border-right: none !important; border-bottom: 1px solid var(--border); }
+  .mbar-cell:last-child { border-bottom: none; }
+
+  .toolbar { justify-content: flex-start; }
+  .btn { font-size: 11px; padding: 0 9px; }
+
+  /* Tablas -> tarjetas apiladas */
+  .tbl-wrap { overflow-x: visible; }
+  table.tbl { table-layout: auto !important; width: 100%; }
+  table.tbl thead { display: none; }
+  table.tbl, table.tbl tbody { display: block; width: 100%; }
+  table.tbl tr { display: block; width: 100%; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; background: var(--surface); overflow: hidden; }
+  table.tbl tr.row-active:hover td,
+  table.tbl tr:hover td { background: transparent; }
+  table.tbl tr:nth-child(odd).row-active td { background: transparent; }
+  table.tbl tr.row-inactive td { background: #FEF5F5 !important; }
+  table.tbl td { display: block; width: 100% !important; border: none !important; border-bottom: 1px solid var(--bg) !important; padding: 7px 10px; text-align: left; }
+  table.tbl tr td:last-child { border-bottom: none !important; }
+  table.tbl td::before { content: attr(data-label); display: block; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-2); margin-bottom: 3px; }
+  table.tbl td[data-label="#"],
+  table.tbl td.drag-col { display: none; }
+  table.tbl td .ti, table.tbl td .ta, table.tbl td .ts { width: 100%; }
+
+  /* Calendario operador (semanal): scroll horizontal en lugar de achicar cada día */
+  .cal-grid-semana { display: flex; overflow-x: auto; border-radius: var(--radius); -webkit-overflow-scrolling: touch; }
+  .cal-grid-semana .cal-head,
+  .cal-grid-semana .cal-day-semana { flex: 0 0 150px; width: 150px; border-right: 1px solid var(--border); }
+  .cal-day-semana { min-height: 130px; }
+  .firma-bloque { grid-template-columns: 1fr; gap: 24px; }
+
+  /* Calendario mantenimiento (anual por semanas) */
+  .cal-meses-grid { grid-template-columns: 1fr; gap: 10px; }
+}
+
 /* ── PRINT ───────────────────────────────────────────────── */
 .ta-print { display: none; }
 @media print {
-  @page { size: A4 landscape; margin: 8mm; }
+  @page { size: 297mm 210mm; margin: 8mm; }
   nav, .no-print { display: none !important; }
   body { background: white; }
-  .layout { padding: 0 !important; gap: 0 !important; }
+  .layout { padding: 0 !important; gap: 0 !important; max-width: none !important; width: 100% !important; margin: 0 !important; }
   .card { box-shadow: none !important; border-radius: 0 !important; }
   .tbl tr { break-inside: avoid; page-break-inside: avoid; }
   .tbl td { vertical-align: top !important; }
@@ -687,7 +790,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
@@ -754,7 +857,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(4,1fr)">
@@ -808,7 +911,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(3,1fr)">
@@ -845,18 +948,18 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
         <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
       </div>
     </div>
     <div class="card-body">
       <div class="section-title">Registro de pedidos</div>
       <div class="toolbar no-print">
         <div class="spacer"></div>
-        <button class="btn btn-primary" onclick="PED.addRow()">＋ Agregar pedido</button>
         <button class="btn btn-ok" onclick="PED.save()">Guardar</button>
         <button class="btn btn-light" onclick="imprimirSolo('reg-ejecucion-ped')">↓ PDF</button>
         <span class="sync-inline" id="ped-st">Sin guardar</span>
       </div>
+      <button class="btn-add-row no-print" onclick="PED.addRow()">＋ Agregar pedido</button>
       <div class="tbl-wrap">
         <table class="tbl" id="ped-table" style="table-layout:auto">
           <thead><tr>
@@ -869,17 +972,23 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
             <th style="width:120px">Fecha necesidad</th>
             <th style="width:120px">Fecha entrega</th>
             <th style="width:145px">Estado</th>
+            <th style="width:110px">Fotos</th>
+            <th style="min-width:160px">Observaciones</th>
             <th class="no-print" style="width:30px">—</th>
           </tr></thead>
           <tbody id="ped-tbody"></tbody>
         </table>
       </div>
-      <button class="btn-add-row no-print" onclick="PED.addRow()">＋ Agregar pedido</button>
     </div>
   </div>
 </div><!-- /page-cambios -->
 
 </div><!-- /layout -->
+
+<div id="fotoLightbox" class="no-print" onclick="if(event.target===this) this.classList.remove('open')">
+  <button type="button" id="fotoLightboxClose" onclick="document.getElementById('fotoLightbox').classList.remove('open')">×</button>
+  <img id="fotoLightboxImg" src="" alt="">
+</div>
 
 <script>
 /* ── FIREBASE ────────────────────────────────────────────── */
@@ -917,9 +1026,22 @@ function setSyncStatus(text, cls=""){
 function setInlineStatus(id, text, cls=""){
   const el = document.getElementById(id);
   if(el){ el.textContent = text; el.className = "sync-inline " + cls; }
+  if(cls === "dirty") scheduleAutoSave(id);
 }
 function mkDirty(id){ setInlineStatus(id, "Cambios sin guardar", "dirty"); }
 function mkSaved(id){ setInlineStatus(id, "✓ Guardado " + new Date().toLocaleTimeString(), "ok"); }
+
+/* ── AUTOGUARDADO ────────────────────────────────────────── */
+const AUTO_SAVE_DELAY = 1500;
+const autoSaveTimers = {};
+function scheduleAutoSave(id){
+  clearTimeout(autoSaveTimers[id]);
+  autoSaveTimers[id] = setTimeout(()=>{
+    if(id === "reg-st")      M.save(true);
+    else if(id === "ped-st") PED.save();
+    else if(id.startsWith("pst-")) P.savePlan(id.slice(4));
+  }, AUTO_SAVE_DELAY);
+}
 
 /* ── POLLING ─────────────────────────────────────────────── */
 let lastRegTs=0, lastPlanTs=0, lastPedTs=0, pollInterval=null;
@@ -1051,7 +1173,40 @@ function colorSel(s){
 }
 
 /* ── AUTOGROW ────────────────────────────────────────────── */
-function autoGrow(el){ el.style.height="auto"; el.style.height=el.scrollHeight+"px"; }
+function autoGrow(el){
+  el.style.height="auto";
+  const cs=getComputedStyle(el);
+  const borderY=parseFloat(cs.borderTopWidth||0)+parseFloat(cs.borderBottomWidth||0);
+  el.style.height=(el.scrollHeight+borderY)+"px";
+}
+// Recalcular alturas cuando termina de cargar la tipografía (las medidas cambian levemente con la fuente real)
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ document.querySelectorAll(".ta").forEach(autoGrow); });
+}
+// Recalcular alturas al cambiar el ancho de ventana (las columnas cambian de tamaño)
+let _resizeAutoGrowT=null;
+window.addEventListener("resize", ()=>{
+  clearTimeout(_resizeAutoGrowT);
+  _resizeAutoGrowT=setTimeout(()=>{ document.querySelectorAll(".ta").forEach(autoGrow); }, 150);
+});
+// Recalcular alturas cuando el ANCHO DE LA TABLA cambia (columnas con "width:1%" se
+// terminan de acomodar después del primer render, y eso deja textareas más chicos de
+// lo que necesitan; esto es lo que cortaba el texto en Pedidos de Repuestos).
+if(window.ResizeObserver){
+  let _lastTblW={};
+  const _tblRO=new ResizeObserver(entries=>{
+    entries.forEach(entry=>{
+      const tbl=entry.target;
+      const w=Math.round(entry.contentRect.width);
+      const key=tbl.id||"_t";
+      if(_lastTblW[key]===w) return; // solo re-medir si cambió el ANCHO, no cuando crece por su propia altura
+      _lastTblW[key]=w;
+      tbl.querySelectorAll(".ta").forEach(autoGrow);
+    });
+  });
+  document.querySelectorAll("table.tbl").forEach(tbl=>_tblRO.observe(tbl));
+}
+
 
 /* ── FECHAS dd/mm/aaaa (texto + picker nativo oculto) ────── */
 function toDisplay(iso){
@@ -1146,17 +1301,17 @@ const M = {
       :`<button class="btn btn-primary" style="height:26px;font-size:inherit" onclick="M.gen(this)">＋ Generar</button>`;
     const eClass=es==="inactivo"?"sel-estado ts s-inactive":"sel-estado ts s-active";
     tr.innerHTML=`
-      <td class="no-print" style="padding:0 4px;width:24px"><span class="drag-handle" title="Arrastrar">⋮⋮</span></td>
-      <td style="width:30px;text-align:center"><span class="row-num"></span></td>
-      <td><input class="ti" type="text" value="${esc(eq||"")}" placeholder="Nombre del equipo" oninput="M.field(this,'equipo')"></td>
-      <td>${mkOtroSelect(TIPOS,ti,"tipo")}</td>
-      <td>${mkOtroSelect(AREAS,ar,"area")}</td>
-      <td style="width:80px"><input class="ti" type="text" value="${esc(ni||"")}" placeholder="EQ-000" oninput="M.field(this,'nident')" onblur="M.checkNident(this)"></td>
-      <td style="width:90px"><input class="ti" type="text" value="${esc(ns||"")}" oninput="M.field(this,'nserie')"></td>
-      <td style="width:90px"><select class="${eClass}" onchange="M.estado(this)">${eOpts}</select></td>
-      <td style="width:90px;text-align:center;padding:4px">${dupBtn}</td>
-      <td style="width:90px;text-align:center;padding:4px">${planBtn}</td>
-      <td style="width:30px;text-align:center;padding:4px"><button class="del-btn" onclick="M.elim(this)">×</button></td>`;
+      <td class="no-print drag-col" style="padding:0 4px;width:24px"><span class="drag-handle" title="Arrastrar">⋮⋮</span></td>
+      <td data-label="#" style="width:30px;text-align:center"><span class="row-num"></span></td>
+      <td data-label="Equipo"><input class="ti" type="text" value="${esc(eq||"")}" placeholder="Nombre del equipo" oninput="M.field(this,'equipo')"></td>
+      <td data-label="Tipo">${mkOtroSelect(TIPOS,ti,"tipo")}</td>
+      <td data-label="Área">${mkOtroSelect(AREAS,ar,"area")}</td>
+      <td data-label="N° Ident." style="width:80px"><input class="ti" type="text" value="${esc(ni||"")}" placeholder="EQ-000" oninput="M.field(this,'nident')" onblur="M.checkNident(this)"></td>
+      <td data-label="N° Serie" style="width:90px"><input class="ti" type="text" value="${esc(ns||"")}" oninput="M.field(this,'nserie')"></td>
+      <td data-label="Estado" style="width:90px"><select class="${eClass}" onchange="M.estado(this)">${eOpts}</select></td>
+      <td data-label="Duplicar" style="width:90px;text-align:center;padding:4px">${dupBtn}</td>
+      <td data-label="Ver plan" style="width:90px;text-align:center;padding:4px">${planBtn}</td>
+      <td data-label="Eliminar" style="width:30px;text-align:center;padding:4px"><button class="del-btn" onclick="M.elim(this)">×</button></td>`;
     M._styleRow(tr);
     return tr;
   },
@@ -1250,12 +1405,14 @@ const M = {
     });
     M.save(); checkPlanesEmpty();
   },
-  async save(){
+  async save(auto=false){
     const rows=M._ser();
     if(rows.length===0){
       // Chequear si hay datos guardados antes de permitir sobrescribir con vacío
       const saved=lsGet(LS_REG);
       if(saved?.rows?.length){
+        // En autoguardado no interrumpimos con confirm(): simplemente no se guarda aún
+        if(auto) return;
         if(!confirm("⚠ No hay máquinas en la tabla actual. Esto BORRARÁ los datos guardados.\n¿Estás seguro?")) return;
       }
     }
@@ -1308,15 +1465,15 @@ const P = {
     const tr=document.createElement("tr");
     tr.setAttribute("draggable","true");
     tr.innerHTML=`
-      <td style="width:2%;padding:0 4px"><span class="drag-handle" title="Arrastrar">⋮⋮</span></td>
-      <td style="width:3%"><span class="row-num">${i+1}</span></td>
-      <td style="width:10%"><input class="ti" type="text" value="${esc(t.sistema||"")}" placeholder="Sistema" oninput="mkPlanDirty(this)" style="text-transform:uppercase;font-weight:600"></td>
-      <td style="width:29%"><textarea class="ta" rows="1" placeholder="Actividad de mantenimiento" oninput="mkPlanDirty(this);autoGrow(this)">${esc(t.actividad||"")}</textarea></td>
-      <td style="width:11%">${freqSel(t.freq||"fd")}</td>
-      <td style="width:24%"><textarea class="ta" rows="1" placeholder="Objetivo / riesgo" oninput="mkPlanDirty(this);autoGrow(this)">${esc(t.objetivo||"")}</textarea></td>
-      <td style="width:10%">${respSel(t.resp||"r-op")}</td>
-      <td style="width:7%"><input class="ti" type="text" value="${esc(t.tiempo||"")}" placeholder="—" oninput="mkPlanDirty(this)" style="text-align:center"></td>
-      <td style="width:4%;text-align:center;padding:4px"><button class="del-btn" onclick="P.delRow(this)">×</button></td>`;
+      <td class="drag-col" style="width:2%;padding:0 4px"><span class="drag-handle" title="Arrastrar">⋮⋮</span></td>
+      <td data-label="#" style="width:3%"><span class="row-num">${i+1}</span></td>
+      <td data-label="Sistema" style="width:10%"><input class="ti" type="text" value="${esc(t.sistema||"")}" placeholder="Sistema" oninput="mkPlanDirty(this)" style="text-transform:uppercase;font-weight:600"></td>
+      <td data-label="Actividad" style="width:29%"><textarea class="ta" rows="1" placeholder="Actividad de mantenimiento" oninput="mkPlanDirty(this);autoGrow(this)">${esc(t.actividad||"")}</textarea></td>
+      <td data-label="Frecuencia" style="width:11%">${freqSel(t.freq||"fd")}</td>
+      <td data-label="Objetivo / Riesgo" style="width:24%"><textarea class="ta" rows="1" placeholder="Objetivo / riesgo" oninput="mkPlanDirty(this);autoGrow(this)">${esc(t.objetivo||"")}</textarea></td>
+      <td data-label="Responsable" style="width:10%">${respSel(t.resp||"r-op")}</td>
+      <td data-label="T. Est." style="width:7%"><input class="ti" type="text" value="${esc(t.tiempo||"")}" placeholder="—" oninput="mkPlanDirty(this)" style="text-align:center"></td>
+      <td data-label="Eliminar" style="width:4%;text-align:center;padding:4px"><button class="del-btn" onclick="P.delRow(this)">×</button></td>`;
     tr.querySelectorAll("select").forEach(colorSel);
     return tr;
   },
@@ -1377,7 +1534,7 @@ const P = {
           <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
         <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
           <div class="meta-cell"><span class="meta-label">Código</span><input class="meta-input" type="text" value="REG-005" readonly tabindex="-1"></div>
-          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">02</span></div>
+          <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
         </div>
       </div>
       <div class="franja-inactivo">⚠ Equipo inactivo — este plan está desactivado</div>
@@ -1921,7 +2078,7 @@ const PED_ESTADOS = [
   ["noiniciado", "NO INICIADO"],
   ["pagado",     "PAGADO"]
 ];
-const PED_ORDEN = { reclamo:1, pendpago:2, proceso:3, cotiz:4, noiniciado:5, pagado:6 };
+const PED_ORDEN = { noiniciado:1, reclamo:2, pendpago:3, proceso:4, cotiz:5, pagado:6 };
 
 const PED = {
   estSelect(cur){
@@ -1945,8 +2102,8 @@ const PED = {
       const vb=b.querySelector(".sel-estado")?.value||"noiniciado";
       const oa=PED_ORDEN[va]||99, ob=PED_ORDEN[vb]||99;
       if(oa!==ob) return oa-ob;
-      const fa=toISO(a.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
-      const fb=toISO(b.querySelectorAll(".ped-date")[1]?.value) || "9999-12-31";
+      const fa=toISO(a.querySelectorAll(".ped-date")[1]?.value) || "";
+      const fb=toISO(b.querySelectorAll(".ped-date")[1]?.value) || "";
       return fa.localeCompare(fb);
     });
     trs.forEach(tr=>tb.appendChild(tr));
@@ -1968,28 +2125,35 @@ const PED = {
     })()].join("");
 
     tr.innerHTML=`
-      <td><span class="row-num"></span></td>
-      <td><select class="ts" onchange="mkDirty('ped-st')">${maqOpts}</select></td>
-      <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder="" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.pieza||"")}</textarea></td>
-      <td><input class="ti ped-cant" type="number" min="0" step="1" value="${esc(d.cantidad||"")}" style="text-align:center" oninput="mkDirty('ped-st')"></td>
-      <td style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder=" " oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.proveedor||"")}</textarea></td>
-      <td><div class="date-wrap">
+      <td data-label="#"><span class="row-num"></span></td>
+      <td data-label="Máquina"><select class="ts" onchange="mkDirty('ped-st')">${maqOpts}</select></td>
+      <td data-label="Pieza / Producto · Necesidad" style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder="" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.pieza||"")}</textarea></td>
+      <td data-label="Cantidad"><input class="ti ped-cant" type="number" min="0" step="1" value="${esc(d.cantidad||"")}" style="text-align:center" oninput="mkDirty('ped-st')"></td>
+      <td data-label="Proveedor" style="width:1%;vertical-align:top"><textarea class="ta ped-ta" rows="1" placeholder=" " oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.proveedor||"")}</textarea></td>
+      <td data-label="Fecha pedido"><div class="date-wrap">
         <input class="ti ped-date" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
           value="${esc(d.fpedido||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)">
         <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this)">
       </div></td>
-      <td><div class="date-wrap">
+      <td data-label="Fecha necesidad"><div class="date-wrap">
         <input class="ti ped-date ped-nec" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
           value="${esc(d.fnecesidad||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)" onblur="PED.sortRows()">
         <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this);PED.sortRows()">
       </div></td>
-      <td><div class="date-wrap">
+      <td data-label="Fecha entrega"><div class="date-wrap">
         <input class="ti ped-date" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"
           value="${esc(d.fentrega||"")}" oninput="mkDirty('ped-st');maskFecha(this)" onclick="abrirPickerFecha(this)">
         <input class="date-picker-hidden" type="date" tabindex="-1" onchange="pickFecha(this)">
       </div></td>
-      <td>${PED.estSelect(d.estado)}</td>
-      <td style="text-align:center;padding:4px" class="no-print"><button class="del-btn" onclick="PED.elim(this)">×</button></td>`;
+      <td data-label="Estado">${PED.estSelect(d.estado)}</td>
+      <td data-label="Fotos">
+        <input type="hidden" class="ped-fotos-data" value="${esc(JSON.stringify(d.fotos||[]))}">
+        <div class="ped-fotos">${PED.fotosHTML(d.fotos||[])}</div>
+        <button type="button" class="ped-foto-add no-print" title="Agregar fotos" onclick="PED.pickFotos(this)">＋</button>
+        <input type="file" class="ped-foto-input no-print" accept="image/*" multiple style="display:none" onchange="PED.onFotos(this)">
+      </td>
+      <td data-label="Observaciones" style="width:1%;vertical-align:top"><textarea class="ta ped-ta ped-obs" rows="1" placeholder="" oninput="mkDirty('ped-st');autoGrow(this)">${esc(d.obs||"")}</textarea></td>
+      <td data-label="Eliminar" style="text-align:center;padding:4px" class="no-print"><button class="del-btn" onclick="PED.elim(this)">×</button></td>`;
 
     return tr;
   },
@@ -2005,6 +2169,9 @@ const PED = {
       const tas=tr.querySelectorAll(".ped-ta");
       const cant=tr.querySelector(".ped-cant");
       const dates=tr.querySelectorAll(".ped-date");
+      const fh=tr.querySelector(".ped-fotos-data");
+      let fotos=[];
+      try{ fotos=JSON.parse(fh?.value||"[]"); }catch(e){ fotos=[]; }
       return {
         mid:        sel?.value||"",
         pieza:      tas[0]?.value||"",
@@ -2013,14 +2180,94 @@ const PED = {
         fpedido:    dates[0]?.value||"",
         fnecesidad: dates[1]?.value||"",
         fentrega:   dates[2]?.value||"",
-        estado:     est?.value||"noiniciado"
+        estado:     est?.value||"noiniciado",
+        fotos:      fotos,
+        obs:        tas[2]?.value||""
       };
     });
   },
+  fotosHTML(fotos){
+    return (fotos||[]).map((src,i)=>
+      `<div class="ped-foto-thumb">
+        <img src="${src}" onclick="PED.verFoto('${src.replace(/'/g,"&#39;")}')">
+        <button type="button" class="ped-foto-del no-print" title="Quitar foto" onclick="PED.delFoto(this)">×</button>
+      </div>`
+    ).join("");
+  },
+  pickFotos(btn){
+    btn.nextElementSibling.click();
+  },
+  compressImage(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=new Image();
+        img.onload=()=>{
+          const maxW=1000;
+          let w=img.width, h=img.height;
+          if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+          const canvas=document.createElement("canvas");
+          canvas.width=w; canvas.height=h;
+          canvas.getContext("2d").drawImage(img,0,0,w,h);
+          resolve(canvas.toDataURL("image/jpeg",0.7));
+        };
+        img.onerror=reject;
+        img.src=e.target.result;
+      };
+      reader.onerror=reject;
+      reader.readAsDataURL(file);
+    });
+  },
+  async onFotos(input){
+    const td=input.closest("td");
+    const dataInput=td.querySelector(".ped-fotos-data");
+    const cont=td.querySelector(".ped-fotos");
+    let fotos=[];
+    try{ fotos=JSON.parse(dataInput.value||"[]"); }catch(e){ fotos=[]; }
+    const files=[...input.files];
+    input.value="";
+    if(!files.length) return;
+    const addBtn=td.querySelector(".ped-foto-add");
+    addBtn.disabled=true; addBtn.textContent="…";
+    try{
+      for(const f of files){
+        try{ fotos.push(await PED.compressImage(f)); }catch(e){}
+      }
+    } finally {
+      addBtn.disabled=false; addBtn.textContent="＋";
+    }
+    dataInput.value=JSON.stringify(fotos);
+    cont.innerHTML=PED.fotosHTML(fotos);
+    mkDirty("ped-st");
+  },
+  delFoto(btn){
+    if(!confirm("¿Quitar esta foto?")) return;
+    const td=btn.closest("td");
+    const dataInput=td.querySelector(".ped-fotos-data");
+    const cont=td.querySelector(".ped-fotos");
+    let fotos=[];
+    try{ fotos=JSON.parse(dataInput.value||"[]"); }catch(e){ fotos=[]; }
+    const idx=[...cont.children].indexOf(btn.closest(".ped-foto-thumb"));
+    if(idx>-1) fotos.splice(idx,1);
+    dataInput.value=JSON.stringify(fotos);
+    cont.innerHTML=PED.fotosHTML(fotos);
+    mkDirty("ped-st");
+  },
+  verFoto(src){
+    const ov=document.getElementById("fotoLightbox");
+    const img=document.getElementById("fotoLightboxImg");
+    if(!ov||!img) return;
+    img.src=src;
+    ov.classList.add("open");
+  },
   addRow(){
     const tb=document.getElementById("ped-tbody");
-    tb.appendChild(PED._buildTr({}));
-    PED.sortRows(); mkDirty("ped-st");
+    const tr=PED._buildTr({});
+    tb.insertBefore(tr, tb.firstChild);
+    PED._renum();
+    mkDirty("ped-st");
+    requestAnimationFrame(()=>{ tr.querySelectorAll(".ped-ta").forEach(autoGrow); });
+    setTimeout(()=>{ PED.sortRows(); }, 300);
   },
   elim(btn){
     const tr=btn.closest("tr");
