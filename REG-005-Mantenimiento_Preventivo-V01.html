@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>REG-005 · Mantenimiento Preventivo · V01</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <style>
 /* ── TOKENS ──────────────────────────────────────────────── */
 :root {
@@ -549,6 +551,64 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 }
 .firma-linea { border-bottom: 1px solid var(--border-d); height: 28px; margin-bottom: 6px; }
 
+/* ── BLOQUE DE PLAN POR MÁQUINA (calendario operador, 1 por máquina) ── */
+.cal-plan-block { break-after: page; page-break-after: always; }
+.cal-plan-block:last-child { break-after: auto; page-break-after: auto; }
+.cal-plan-block + .cal-plan-block { margin-top: 22px; }
+.cal-plan-title {
+  text-align: center; font-family: var(--mono);
+  font-weight: 700; font-size: 12px; letter-spacing: .04em;
+  color: var(--accent-d); background: var(--accent-l);
+  border: 1px solid var(--border); border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 6px 10px;
+}
+.cal-plan-block .cal-grid-semana { border-radius: 0; }
+.doc-header.cal-plan-header-print { display: none; }
+.cal-nota {
+  margin-top: 18px; padding-top: 10px; border-top: 1px solid #9AA3AB;
+  font-size: 14px; line-height: 1.6; color: #000; font-weight: 600; text-align: center;
+}
+
+/* ── MULTISELECT (selector de varias máquinas) ───────────── */
+.ms-wrap { position: relative; }
+.ms-trigger {
+  width: 100%; height: 26px; padding: 3px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--accent-d);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: white; cursor: pointer; text-align: left;
+}
+.ms-trigger:hover { border-color: var(--border-d); }
+.ms-trigger.open { border-color: var(--accent); }
+.ms-trigger-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-trigger-arrow { flex-shrink: 0; transition: transform .12s; }
+.ms-trigger.open .ms-trigger-arrow { transform: rotate(180deg); }
+.ms-panel {
+  display: none; position: fixed; top: 0; left: 0;
+  min-width: 240px; max-width: 320px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  z-index: 300; overflow: hidden;
+}
+.ms-panel.open { display: block; }
+.ms-panel-actions {
+  display: flex; gap: 6px; padding: 6px 8px;
+  border-bottom: 1px solid var(--border); background: var(--bg);
+}
+.ms-panel-actions button {
+  font-family: var(--font); font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em;
+  color: var(--accent); background: transparent;
+  border: 1px solid var(--accent-l); border-radius: 3px;
+  padding: 3px 8px; cursor: pointer;
+}
+.ms-panel-actions button:hover { background: var(--accent-l); }
+.ms-panel-list { max-height: 220px; overflow-y: auto; padding: 4px 0; }
+.ms-item { display: flex; align-items: center; gap: 7px; padding: 5px 10px; font-size: 12px; color: var(--text); cursor: pointer; }
+.ms-item:hover { background: var(--accent-l); }
+.ms-item input[type=checkbox] { accent-color: var(--accent); width: 13px; height: 13px; cursor: pointer; flex-shrink: 0; }
+.ms-panel-empty { padding: 12px 10px; font-size: 11.5px; color: var(--text-3); text-align: center; }
+
 /* ── CALENDAR (mantenimiento: anual por semanas) ─────────── */
 .cal-meses-grid {
   display: grid;
@@ -717,13 +777,20 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 
   /* Calendario OP en PDF: ajustar para entrar en A4 landscape */
   #reg-ejecucion-op .card-body { padding: 0 !important; }
-  #reg-ejecucion-op .cal-grid-semana { font-size: 10px !important; }
-  #reg-ejecucion-op .cal-head { font-size: 10px !important; padding: 4px 2px !important; }
-  #reg-ejecucion-op .cal-day-semana { padding: 2px !important; min-height: 88mm !important; display: block !important; }
+  #reg-ejecucion-op .cal-grid-semana { font-size: 10px !important; border: 1.5px solid #9AA3AB !important; }
+  #reg-ejecucion-op .cal-head { font-size: 10px !important; padding: 4px 2px !important; border-right: 1px solid rgba(255,255,255,.35) !important; }
+  #reg-ejecucion-op .cal-day-semana { padding: 2px !important; min-height: 88mm !important; display: block !important; border-right: 1.5px solid #9AA3AB !important; border-bottom: 1.5px solid #9AA3AB !important; }
   #reg-ejecucion-op .cal-task { padding: 3px 4px !important; margin-bottom: 2px !important; font-size: 10px !important; break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; }
   #reg-ejecucion-op .cal-actividad { font-size: 10px !important; }
   #reg-ejecucion-op .cal-tiempo { font-size: 9px !important; }
   #reg-ejecucion-op .cal-firma-act { font-size: 9px !important; margin-top: 4px !important; padding-top: 12px !important; }
+  #reg-ejecucion-op .cal-plan-title { display: none !important; }
+  #reg-ejecucion-op .cal-plan-block { page-break-after: always !important; break-after: page !important; }
+  #reg-ejecucion-op .cal-plan-block:last-child { page-break-after: auto !important; break-after: auto !important; }
+  #op-doc-header-outer { display: none !important; }
+  #reg-ejecucion-op { -webkit-box-decoration-break: clone !important; box-decoration-break: clone !important; }
+  #reg-ejecucion-op .doc-header.cal-plan-header-print { display: grid !important; margin-bottom: 0; }
+  #reg-ejecucion-op .cal-plan-block .cal-grid-semana { border-radius: 0 !important; }
 
   /* Calendario MT en PDF: letra coherente con pantalla, ocultar semanas vacías */
   #reg-ejecucion-mt .cal-mes-title { font-size: 11px !important; padding: 5px 8px !important; }
@@ -847,7 +914,7 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 
   <!-- ── 3A: OPERADOR (semanal por días) ── -->
   <div class="card" id="reg-ejecucion-op">
-    <div class="doc-header">
+    <div class="doc-header" id="op-doc-header-outer">
       <div class="logo-box"><span class="logo-text">BT</span></div>
       <div class="doc-title-area">
         <div class="doc-title">Registro de Ejecución — Operador</div>
@@ -861,41 +928,33 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
       </div>
     </div>
     <div class="mbar no-print" style="grid-template-columns:repeat(4,1fr)">
-      <div class="mbar-cell"><span class="mbar-label">Máquina</span><select id="cal-maquina-op" class="mbar-select"></select></div>
+      <div class="mbar-cell">
+        <span class="mbar-label">Máquinas</span>
+        <div class="ms-wrap" id="ms-op-wrap">
+          <button type="button" class="ms-trigger" id="ms-op-trigger" onclick="msOpToggle()">
+            <span class="ms-trigger-text" id="ms-op-trigger-text">Seleccionar máquinas…</span>
+            <svg class="ms-trigger-arrow" width="9" height="6" viewBox="0 0 9 6"><path d="M0 0l4.5 6L9 0z" fill="#5A6470"/></svg>
+          </button>
+          <div class="ms-panel" id="ms-op-panel">
+            <div class="ms-panel-actions">
+              <button type="button" onclick="msOpSelectAll(true)">Todas</button>
+              <button type="button" onclick="msOpSelectAll(false)">Ninguna</button>
+            </div>
+            <div class="ms-panel-list" id="ms-op-list"></div>
+          </div>
+        </div>
+      </div>
       <div class="mbar-cell"><span class="mbar-label">Semana</span><select id="cal-semana-op" class="mbar-select"></select></div>
       <div class="mbar-cell"><span class="mbar-label">Mes</span><select id="cal-mes-op" class="mbar-select" onchange="actualizarSemanasOp()"></select></div>
       <div class="mbar-cell"><span class="mbar-label">Año</span><input id="cal-anio-op" class="mbar-input" type="number" value="2026" min="2020" max="2099" onchange="actualizarSemanasOp()"></div>
     </div>
     <div class="card-body">
       <div class="toolbar no-print">
-        <button class="btn btn-primary" onclick="generarCalOp()">Generar calendario</button>
+        <button class="btn btn-primary" onclick="generarCalOp()">Generar calendarios</button>
         <button class="btn btn-danger" onclick="limpiarCalOp()">Limpiar</button>
-        <button class="btn btn-light" onclick="imprimirSolo('reg-ejecucion-op')">↓ PDF</button>
+        <button class="btn btn-light" onclick="imprimirSolo('reg-ejecucion-op')">↓ PDF (todo lo generado)</button>
       </div>
       <div id="calendario-op"></div>
-      <div class="firma-bloque" id="firma-bloque-op" style="display:none">
-  <div><div class="firma-linea"></div><strong>Firma Responsable</strong></div>
-  <div><div class="firma-linea"></div><strong>Aclaración</strong></div>
-</div>
-
-<div style="
-  margin-top:18px;
-  padding-top:10px;
-  border-top:1px solid #9AA3AB;
-  font-size:14px;
-  line-height:1.6;
-  color:#000;
-  font-weight:600;
-  text-align:center;
-">
-  <strong><u>Nota:</u></strong>
-  Si por algún motivo de fuerza mayor no se puede realizar el mantenimiento en la fecha estipulada,
-  se deberá efectuar en el próximo día hábil, consignando la
-  <strong><u>fecha</u></strong>
-  y la
-  <strong><u>firma</u></strong>
-  junto a la actividad realizada.
-</div>
     </div>
   </div>
 
@@ -992,26 +1051,31 @@ tr.drag-over td { background: var(--accent-l) !important; border-top: 2px solid 
 
 <script>
 /* ── FIREBASE ────────────────────────────────────────────── */
-const FB_URL  = "https://sgc2-72ddb-default-rtdb.firebaseio.com";
 const FB_REG  = "/pmp/registro";
 const FB_PLAN = "/pmp/planes";
 const FB_PED  = "/pmp/pedidos";
 const LS_REG  = "pmp_reg_v9";
 const LS_PLAN = "pmp_plan_v9";
 const LS_PED  = "pmp_ped_v9";
+const firebaseConfig = {
+  apiKey: "AIzaSyC_UyZwYchcJsVrgSMEDoB5by-aRbrgV8g",
+  authDomain: "sgc-c-1b030.firebaseapp.com",
+  databaseURL: "https://sgc-c-1b030-default-rtdb.firebaseio.com",
+  projectId: "sgc-c-1b030",
+  storageBucket: "sgc-c-1b030.firebasestorage.app",
+  messagingSenderId: "728378804452",
+  appId: "1:728378804452:web:52c6eb09eb47d2e6e484f1"
+};
+firebase.initializeApp(firebaseConfig);
+let _db = null;
+function getDb(){ if(!_db) _db = firebase.database(); return _db; }
 
 async function fbGet(path){
-  const r = await fetch(FB_URL + path + ".json");
-  if(!r.ok) throw new Error("fbGet " + r.status);
-  return r.json();
+  const snap = await getDb().ref(path).once("value");
+  return snap.val();
 }
 async function fbSet(path, data){
-  const r = await fetch(FB_URL + path + ".json", {
-    method:"PUT", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify(data)
-  });
-  if(!r.ok) throw new Error("fbSet " + r.status);
-  return r.json();
+  await getDb().ref(path).set(data);
 }
 function lsGet(k){ try{ return JSON.parse(localStorage.getItem(k)||"null"); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
@@ -1043,77 +1107,105 @@ function scheduleAutoSave(id){
   }, AUTO_SAVE_DELAY);
 }
 
-/* ── POLLING ─────────────────────────────────────────────── */
-let lastRegTs=0, lastPlanTs=0, lastPedTs=0, pollInterval=null;
+/* ── SYNC EN TIEMPO REAL ─────────────────────────────────────
+   Antes: carga inicial + polling cada 15s de los 3 nodos (registro,
+   planes, pedidos), con un resguardo para no pisar la pantalla mientras
+   alguien está escribiendo en la tabla. Ahora: un listener onValue por
+   nodo — el resguardo de "no interrumpir mientras se edita" se mantiene
+   igual, solo que ya no hace falta re-consultar nada cada 15s. */
+let lastRegTs=0, lastPlanTs=0, lastPedTs=0;
+let _regRows = [], _planData = {};
+let _recibidoReg=false, _recibidoPlan=false, _recibidoPed=false;
+
+function _estaEditando(soloPed){
+  const active = document.activeElement;
+  if(!active || !["INPUT","TEXTAREA","SELECT"].includes(active.tagName)) return false;
+  if(soloPed) return !!document.getElementById("ped-tbody")?.contains(active);
+  return !!(document.getElementById("reg-tbody")?.contains(active) || document.getElementById("ped-tbody")?.contains(active));
+}
+function _refrescarRegistroYPlanes(forzar){
+  if(!forzar && _estaEditando(false)) return;
+  document.getElementById("reg-tbody").innerHTML = "";
+  document.querySelectorAll(".plan-page").forEach(p=>p.remove());
+  M.restore(_regRows, _planData);
+}
+function _todosListos(){
+  if(_recibidoReg && _recibidoPlan && _recibidoPed) setSyncStatus("En vivo", "sync-ok");
+}
 
 async function loadAll(){
   setSyncStatus("Cargando…");
-  try{
-    const [rReg, rPlan, rPed] = await Promise.all([fbGet(FB_REG), fbGet(FB_PLAN), fbGet(FB_PED)]);
-    const lReg  = lsGet(LS_REG)  || {ts:0, rows:[]};
-    const lPlan = lsGet(LS_PLAN) || {ts:0, data:{}};
-    const lPed  = lsGet(LS_PED)  || {ts:0, rows:[]};
 
-    // Registro
-    const rRegTs = rReg?.ts||0;
-    const lRegTs = lReg?.ts||0;
-    const rRegValid = rReg && Array.isArray(rReg.rows) && rReg.rows.length > 0;
-    const lRegValid = lReg?.rows?.length > 0;
-    if(rRegValid && rRegTs >= lRegTs){
-      lastRegTs = rRegTs; lsSet(LS_REG, rReg);
-      M.restore(rReg.rows, rPlan?.data||{});
-    } else if(lRegValid){
-      lastRegTs = lRegTs; M.restore(lReg.rows, lPlan?.data||{});
-      await fbSet(FB_REG, lReg);
-    } else { M.restore([], {}); }
-
-    // Planes
-    const rPlanTs = rPlan?.ts||0;
-    if(rPlan?.data && rPlanTs >= (lPlan.ts||0)){ lastPlanTs=rPlanTs; lsSet(LS_PLAN, rPlan); }
-    else if(lPlan?.data){ lastPlanTs=lPlan.ts; await fbSet(FB_PLAN, lPlan); }
-
-    // Pedidos
-    const rPedTs = rPed?.ts||0;
-    if(rPed && Array.isArray(rPed.rows) && rPedTs >= (lPed.ts||0)){
-      lastPedTs=rPedTs; lsSet(LS_PED, rPed); PED.restore(rPed.rows);
-    } else if(lPed?.rows?.length){ lastPedTs=lPed.ts; PED.restore(lPed.rows); await fbSet(FB_PED, lPed); }
-    else { PED.restore([]); }
-
-    setSyncStatus("En vivo", "sync-ok");
-    startPolling();
-  } catch(err){
-    const lr=lsGet(LS_REG); const lp=lsGet(LS_PLAN); const lpd=lsGet(LS_PED);
-    M.restore(lr?.rows||[], lp?.data||{});
-    PED.restore(lpd?.rows||[]);
+  getDb().ref(FB_REG).on("value", (snap)=>{
+    const rReg = snap.val();
+    if(!_recibidoReg){
+      const lReg = lsGet(LS_REG) || {ts:0, rows:[]};
+      const rRegTs = rReg?.ts||0, lRegTs = lReg?.ts||0;
+      const rRegValid = rReg && Array.isArray(rReg.rows) && rReg.rows.length > 0;
+      const lRegValid = lReg?.rows?.length > 0;
+      if(rRegValid && rRegTs >= lRegTs){ lastRegTs = rRegTs; lsSet(LS_REG, rReg); _regRows = rReg.rows; }
+      else if(lRegValid){ lastRegTs = lRegTs; _regRows = lReg.rows; fbSet(FB_REG, lReg); }
+      else { _regRows = []; }
+      _recibidoReg = true;
+      _refrescarRegistroYPlanes(true);
+      _todosListos();
+    } else if(rReg && Array.isArray(rReg.rows) && (rReg.ts||0) > lastRegTs){
+      lastRegTs = rReg.ts; lsSet(LS_REG, rReg); _regRows = rReg.rows;
+      _refrescarRegistroYPlanes(false);
+    }
+  }, ()=>{
+    if(!_recibidoReg){
+      const lReg = lsGet(LS_REG); _regRows = lReg?.rows||[]; _recibidoReg = true;
+      _refrescarRegistroYPlanes(true); _todosListos();
+    }
     setSyncStatus("Sin conexión", "sync-error");
-  }
-}
+  });
 
-function startPolling(){
-  if(pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(async ()=>{
-    try{
-      const [rReg, rPlan, rPed] = await Promise.all([fbGet(FB_REG), fbGet(FB_PLAN), fbGet(FB_PED)]);
-      if(rReg && Array.isArray(rReg.rows) && (rReg.ts||0) > lastRegTs){
-        const active = document.activeElement;
-        const editing = active && ["INPUT","TEXTAREA","SELECT"].includes(active.tagName) &&
-          (document.getElementById("reg-tbody")?.contains(active) || document.getElementById("ped-tbody")?.contains(active));
-        if(!editing){
-          lastRegTs = rReg.ts; lsSet(LS_REG, rReg);
-          document.getElementById("reg-tbody").innerHTML = "";
-          document.querySelectorAll(".plan-page").forEach(p=>p.remove());
-          M.restore(rReg.rows, rPlan?.data||{});
-        }
+  getDb().ref(FB_PLAN).on("value", (snap)=>{
+    const rPlan = snap.val();
+    if(!_recibidoPlan){
+      const lPlan = lsGet(LS_PLAN) || {ts:0, data:{}};
+      const rPlanTs = rPlan?.ts||0;
+      if(rPlan?.data && rPlanTs >= (lPlan.ts||0)){ lastPlanTs=rPlanTs; lsSet(LS_PLAN, rPlan); _planData = rPlan.data; }
+      else if(lPlan?.data){ lastPlanTs=lPlan.ts; _planData = lPlan.data; fbSet(FB_PLAN, lPlan); }
+      _recibidoPlan = true;
+      _refrescarRegistroYPlanes(true);
+      _todosListos();
+    } else if(rPlan?.data && (rPlan.ts||0) > lastPlanTs){
+      lastPlanTs = rPlan.ts; lsSet(LS_PLAN, rPlan); _planData = rPlan.data;
+      _refrescarRegistroYPlanes(false);
+    }
+  }, ()=>{
+    if(!_recibidoPlan){
+      const lPlan = lsGet(LS_PLAN); _planData = lPlan?.data||{}; _recibidoPlan = true;
+      _refrescarRegistroYPlanes(true); _todosListos();
+    }
+    setSyncStatus("Sin conexión", "sync-error");
+  });
+
+  getDb().ref(FB_PED).on("value", (snap)=>{
+    const rPed = snap.val();
+    if(!_recibidoPed){
+      const lPed = lsGet(LS_PED) || {ts:0, rows:[]};
+      const rPedTs = rPed?.ts||0;
+      if(rPed && Array.isArray(rPed.rows) && rPedTs >= (lPed.ts||0)){
+        lastPedTs=rPedTs; lsSet(LS_PED, rPed); PED.restore(rPed.rows);
+      } else if(lPed?.rows?.length){
+        lastPedTs=lPed.ts; PED.restore(lPed.rows); fbSet(FB_PED, lPed);
+      } else { PED.restore([]); }
+      _recibidoPed = true;
+      _todosListos();
+    } else if(rPed && Array.isArray(rPed.rows) && (rPed.ts||0) > lastPedTs){
+      if(!_estaEditando(true)){
+        lastPedTs=rPed.ts; lsSet(LS_PED, rPed); PED.restore(rPed.rows);
       }
-      if(rPlan?.data && (rPlan.ts||0) > lastPlanTs){ lastPlanTs=rPlan.ts; lsSet(LS_PLAN, rPlan); }
-      if(rPed && Array.isArray(rPed.rows) && (rPed.ts||0) > lastPedTs){
-        const active = document.activeElement;
-        const editingPed = active && ["INPUT","TEXTAREA","SELECT"].includes(active.tagName) && document.getElementById("ped-tbody")?.contains(active);
-        if(!editingPed){ lastPedTs=rPed.ts; lsSet(LS_PED, rPed); PED.restore(rPed.rows); }
-      }
-      setSyncStatus("En vivo","sync-ok");
-    } catch(e){ setSyncStatus("Sin conexión","sync-error"); }
-  }, 15000);
+    }
+  }, ()=>{
+    if(!_recibidoPed){
+      const lPed = lsGet(LS_PED); PED.restore(lPed?.rows||[]); _recibidoPed = true; _todosListos();
+    }
+    setSyncStatus("Sin conexión", "sync-error");
+  });
 }
 
 /* ── TAB NAVIGATION ──────────────────────────────────────── */
@@ -1590,8 +1682,8 @@ function mkPlanDirty(el){
 function irACalendario(mid){
   showTab("page-ejecucion", document.querySelector('nav a.tab-link:nth-child(4)'));
   setTimeout(()=>{
-    const sel=document.getElementById("cal-maquina-op");
-    if(sel){ sel.value=mid; }
+    msOpSelected=new Set([mid]);
+    msOpPopulate();
     const selMt=document.getElementById("cal-maquina-mt");
     if(selMt){ selMt.value=mid; }
   }, 50);
@@ -1717,21 +1809,135 @@ function tareaEnDia(t,fecha,mid){
   return false;
 }
 
-function generarCalOp(){
-  const mid=document.getElementById("cal-maquina-op").value;
-  const semana=parseInt(document.getElementById("cal-semana-op").value);
-  const mes=parseInt(document.getElementById("cal-mes-op").value);
-  const anio=parseInt(document.getElementById("cal-anio-op").value);
-  if(!mid){ alert("Seleccioná una máquina primero."); return; }
+/* ═══════════════════════════════════════════════════════════
+   MULTISELECT — MÁQUINAS (Ejecución Operador)
+   Permite tildar varias máquinas y generar/imprimir sus planes
+   semanales todos juntos, sin repetir el proceso una por una.
+═══════════════════════════════════════════════════════════ */
+let msOpSelected = new Set();
+let msOpKnownMids = new Set(); // máquinas ya vistas alguna vez (para no re-marcar automáticamente las que el usuario destildó)
 
-  const maqNombre=document.getElementById("cal-maquina-op").selectedOptions[0].text;
+function msOpToggle(force){
+  const trigger=document.getElementById("ms-op-trigger");
+  const panel=document.getElementById("ms-op-panel");
+  if(!trigger||!panel) return;
+  const willOpen = force!==undefined ? force : !panel.classList.contains("open");
+  if(willOpen) msOpPositionPanel();
+  panel.classList.toggle("open", willOpen);
+  trigger.classList.toggle("open", willOpen);
+}
+function msOpPositionPanel(){
+  const trigger=document.getElementById("ms-op-trigger");
+  const panel=document.getElementById("ms-op-panel");
+  if(!trigger||!panel) return;
+  const r=trigger.getBoundingClientRect();
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const width=Math.max(r.width, 240);
+  let left=r.left, top=r.bottom+4;
+  if(left+width > vw-8) left = Math.max(8, vw-8-width);
+  const maxH = Math.max(140, Math.min(280, vh - top - 12));
+  panel.style.width = width+"px";
+  panel.style.left = left+"px";
+  panel.style.top = top+"px";
+  panel.querySelector(".ms-panel-list").style.maxHeight = (maxH-38)+"px"; // 38px = alto de la fila Todas/Ninguna
+}
+document.addEventListener("click", e=>{
+  const wrap=document.getElementById("ms-op-wrap");
+  if(wrap && !wrap.contains(e.target)) msOpToggle(false);
+});
+window.addEventListener("scroll", (e)=>{
+  const panel=document.getElementById("ms-op-panel");
+  if(panel && panel.contains(e.target)) return; // scroll interno del listado: no cerrar
+  msOpToggle(false);
+}, true);
+window.addEventListener("resize", ()=>msOpToggle(false));
+
+function msOpPopulate(){
+  const list=document.getElementById("ms-op-list");
+  if(!list) return;
+  const filasMaquina=[...document.querySelectorAll("#reg-tbody tr[data-mid]")];
+  const mids=filasMaquina.map(tr=>tr.dataset.mid).filter(Boolean);
+
+  if(!mids.length){
+    list.innerHTML=`<div class="ms-panel-empty">No hay máquinas cargadas.</div>`;
+    msOpSelected=new Set();
+    msOpKnownMids=new Set();
+    msOpUpdateTrigger();
+    return;
+  }
+
+  list.innerHTML="";
+  filasMaquina.forEach(tr=>{
+    const mid=tr.dataset.mid, nombre=tr.querySelector(".ti")?.value||"Máquina";
+    if(!mid) return;
+    // Máquina nueva (recién generada) -> tildada por defecto.
+    // Máquina ya conocida -> respeta lo que el usuario haya tildado/destildado.
+    const esNueva=!msOpKnownMids.has(mid);
+    const checked = esNueva ? true : msOpSelected.has(mid);
+    const id="msop-"+mid;
+    const row=document.createElement("label");
+    row.className="ms-item";
+    row.innerHTML=`<input type="checkbox" id="${id}" value="${esc(mid)}" ${checked?"checked":""} onchange="msOpOnChange()"><span>${esc(nombre)}</span>`;
+    list.appendChild(row);
+    msOpKnownMids.add(mid);
+  });
+
+  msOpSelected=new Set([...list.querySelectorAll("input:checked")].map(cb=>cb.value));
+  msOpUpdateTrigger();
+}
+
+function msOpOnChange(){
+  const list=document.getElementById("ms-op-list");
+  msOpSelected=new Set([...list.querySelectorAll("input:checked")].map(cb=>cb.value));
+  msOpUpdateTrigger();
+}
+
+function msOpSelectAll(val){
+  const list=document.getElementById("ms-op-list");
+  list.querySelectorAll("input[type=checkbox]").forEach(cb=>{ cb.checked=val; });
+  msOpOnChange();
+}
+
+function msOpUpdateTrigger(){
+  const txt=document.getElementById("ms-op-trigger-text");
+  const list=document.getElementById("ms-op-list");
+  if(!txt||!list) return;
+  const total=list.querySelectorAll("input[type=checkbox]").length;
+  const n=msOpSelected.size;
+  if(!total) txt.textContent="Sin máquinas";
+  else if(n===0) txt.textContent="Ninguna máquina seleccionada";
+  else if(n===total) txt.textContent="Todas las máquinas ("+n+")";
+  else txt.textContent=n+" máquina"+(n===1?"":"s")+" seleccionada"+(n===1?"":"s");
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CALENDARIO — OPERADOR: generación (una o varias máquinas)
+═══════════════════════════════════════════════════════════ */
+function construirBloqueCalOp(mid, fechas, semana, subGeneral){
+  const trM=document.querySelector(`#reg-tbody tr[data-mid="${mid}"]`);
+  const maqNombre=trM?.querySelector(".ti")?.value||"Máquina";
   const tareas=P.getTasks(mid).filter(t=>t.resp==="r-op");
-  const fechas=getFechasSemana(anio,mes,semana);
+  const subtitulo=esc(maqNombre)+" — Semana "+semana+" ("+fmtDia(fechas[0])+" al "+fmtDia(fechas[fechas.length-1])+")";
 
-  const sub=maqNombre+" — Semana "+semana+" ("+fmtDia(fechas[0])+" al "+fmtDia(fechas[fechas.length-1])+") · Operador";
-  document.getElementById("cal-sub-op").textContent=sub;
-
-  let html=`<div class="cal-grid-semana" style="grid-template-columns:repeat(${fechas.length}, 1fr)">`;
+  // Header repetido por máquina: oculto en pantalla, visible solo al imprimir/exportar PDF.
+  // El subtítulo del header muestra el nombre de ESTA máquina (no el genérico "N máquinas"
+  // que se ve en pantalla), porque en el PDF cada página es un documento por separado.
+  let html=`<div class="cal-plan-block" data-mid="${esc(mid)}">
+    <div class="doc-header cal-plan-header-print">
+      <div class="logo-box"><span class="logo-text">BT</span></div>
+      <div class="doc-title-area">
+        <div class="doc-title">Registro de Ejecución — Operador</div>
+        <div class="doc-subtitle">${subtitulo}</div>
+      </div>
+      <div class="doc-meta">
+        <div class="meta-cell"><span class="meta-label">Aprobación</span><span class="meta-value">24/06/2026</span></div>
+        <div class="meta-cell"><span class="meta-label">Entrada en vigor</span><span class="meta-value">24/06/2026</span></div>
+        <div class="meta-cell"><span class="meta-label">Código</span><span class="meta-value">REG-005</span></div>
+        <div class="meta-cell"><span class="meta-label">Versión</span><span class="meta-value">01</span></div>
+      </div>
+    </div>
+    <div class="cal-plan-title">${subtitulo}</div>
+    <div class="cal-grid-semana" style="grid-template-columns:repeat(${fechas.length}, 1fr)">`;
 
   fechas.forEach(f=>{
     html+=`<div class="cal-head">${["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"][f.getDay()]} ${String(f.getDate()).padStart(2,"0")}/${String(f.getMonth()+1).padStart(2,"0")}</div>`;
@@ -1757,10 +1963,43 @@ function generarCalOp(){
 
   html+=`</div>`;
 
-  document.getElementById("calendario-op").innerHTML=html;
+  html+=`<div class="firma-bloque">
+    <div><div class="firma-linea"></div><strong>Firma Responsable</strong></div>
+    <div><div class="firma-linea"></div><strong>Aclaración</strong></div>
+  </div>
+  <div class="cal-nota">
+    <strong><u>Nota:</u></strong>
+    Si por algún motivo de fuerza mayor no se puede realizar el mantenimiento en la fecha estipulada,
+    se deberá efectuar en el próximo día hábil, consignando la
+    <strong><u>fecha</u></strong>
+    y la
+    <strong><u>firma</u></strong>
+    junto a la actividad realizada.
+  </div></div>`;
 
-  const fb=document.getElementById("firma-bloque-op");
-  if(fb) fb.style.display="";
+  return html;
+}
+
+function generarCalOp(){
+  const semana=parseInt(document.getElementById("cal-semana-op").value);
+  const mes=parseInt(document.getElementById("cal-mes-op").value);
+  const anio=parseInt(document.getElementById("cal-anio-op").value);
+
+  // Orden según el listado de la Hoja 1, filtrado por lo tildado en el multiselect
+  const ordenMids=[...document.querySelectorAll("#reg-tbody tr[data-mid]")]
+    .map(tr=>tr.dataset.mid)
+    .filter(mid=>mid && msOpSelected.has(mid));
+
+  if(!ordenMids.length){ alert("Seleccioná al menos una máquina."); return; }
+
+  const fechas=getFechasSemana(anio,mes,semana);
+  const rango="Semana "+semana+" ("+fmtDia(fechas[0])+" al "+fmtDia(fechas[fechas.length-1])+") · Operador";
+  const subGeneral = ordenMids.length===1 ? rango : ordenMids.length+" máquinas · "+rango;
+  document.getElementById("cal-sub-op").textContent = subGeneral;
+
+  let htmlTotal="";
+  ordenMids.forEach(mid=>{ htmlTotal += construirBloqueCalOp(mid, fechas, semana, subGeneral); });
+  document.getElementById("calendario-op").innerHTML=htmlTotal;
 }
 
 function limpiarCalOp(){
@@ -1768,7 +2007,6 @@ function limpiarCalOp(){
   if(!confirm("Limpiar el calendario?")) return;
   document.getElementById("calendario-op").innerHTML="";
   document.getElementById("cal-sub-op").textContent="Calendario semanal de mantenimiento";
-  const fb=document.getElementById("firma-bloque-op"); if(fb) fb.style.display="none";
 }
 
 /* ── IMPRIMIR SOLO UN CARD/SECTION ───────────────────────── */
@@ -2043,16 +2281,18 @@ function limpiarCalMt(){
 
 /* ── CARGAR SELECTORES ───────────────────────────────────── */
 function cargarSelectoresCalendario(){
-  ["cal-maquina-op","cal-maquina-mt"].forEach(selId=>{
-    const sel=document.getElementById(selId); if(!sel) return;
-    const cur=sel.value;
-    sel.innerHTML="";
+  msOpPopulate();
+
+  const selMt=document.getElementById("cal-maquina-mt");
+  if(selMt){
+    const cur=selMt.value;
+    selMt.innerHTML="";
     document.querySelectorAll("#reg-tbody tr[data-mid]").forEach(tr=>{
       const mid=tr.dataset.mid, nombre=tr.querySelector(".ti")?.value||"Máquina";
-      if(mid) sel.appendChild(new Option(nombre,mid));
+      if(mid) selMt.appendChild(new Option(nombre,mid));
     });
-    if(cur) sel.value=cur;
-  });
+    if(cur) selMt.value=cur;
+  }
 
   const selMes=document.getElementById("cal-mes-op"); if(!selMes) return;
   if(!selMes.options.length){ MESES.forEach((m,i)=>selMes.appendChild(new Option(m,i))); }
